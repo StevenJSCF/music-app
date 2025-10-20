@@ -1,28 +1,21 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+// app/api/login/route.ts
+import { NextResponse } from 'next/server';
 
-const scopes = [
-  "streaming",
-  "user-read-email",
-  "user-read-private",
-  "user-read-playback-state",
-  "user-modify-playback-state",
-  "user-read-currently-playing",
-].join(" ");
+export async function GET() {
+  const client_id = process.env.SPOTIFY_CLIENT_ID!;
+  const redirect_uri = process.env.SPOTIFY_REDIRECT_URI!;
+  const scopes = process.env.NEXT_PUBLIC_SPOTIFY_SCOPES ?? '';
 
-export async function GET(request: Request) {
-  const client_id = process.env.SPOTIFY_CLIENT_ID || "";
-  const redirect_uri = process.env.SPOTIFY_REDIRECT_URI || "";
-  const state = Math.random().toString(36).slice(2, 12);
+  const state = Math.random().toString(36).slice(2, 15);
 
   const params = new URLSearchParams({
-    response_type: "code",
     client_id,
-    scope: scopes,
+    response_type: 'code',
     redirect_uri,
+    scope: decodeURIComponent(scopes),
     state,
+    show_dialog: 'true'
   });
 
-  return Response.redirect(
-    `https://accounts.spotify.com/authorize?${params.toString()}`
-  );
+  return NextResponse.redirect(`https://accounts.spotify.com/authorize?${params.toString()}`);
 }
