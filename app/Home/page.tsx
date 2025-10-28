@@ -1,55 +1,103 @@
 // pages/spotify.tsx
 
 import { cookies } from "next/headers";
+import ProfileCard from "../components/ProfileCard";
+import SongSearch from "../components/SongSearch";
 
-export default async function SpotifyPage() {
-  let profile = null;
-  let error = "";
+async function getProfile(accessToken: string) {
+  const profileRes = await fetch("https://api.spotify.com/v1/me", {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    next: { revalidate: 0 },
+  });
+  if (!profileRes.ok) return null;
+  return profileRes.json();
+}
+
+export default async function Home() {
   const cookieStore = await cookies();
-  const access_token = cookieStore.get("spotify_access_token")?.value;
+  const accessToken = cookieStore.get("spotify_access_token")?.value;
 
-  if (!access_token) {
+  if (!accessToken) {
     return (
-      <div>
-        Not logged in after login. <a href="/api/login">Login with Spotify</a>
-      </div>
+      <main
+        style={{
+          padding: 32,
+          maxWidth: 400,
+          margin: "40px auto",
+          textAlign: "center",
+        }}
+      >
+        <h2>Not logged in</h2>
+        <a
+          href="/api/login"
+          style={{
+            color: "#1DB954",
+            textDecoration: "none",
+            fontWeight: "bold",
+          }}
+        >
+          Login with Spotify
+        </a>
+      </main>
     );
   }
 
-  try {
-    const profileRes = await fetch("https://api.spotify.com/v1/me", {
-      headers: { Authorization: `Bearer ${access_token}` },
-    });
-
-    if (profileRes.status === 401) {
-      // token expired — you can redirect the client to call /api/refresh or call refresh here
-      return (
-        <div>
-          Not logged in it failed. <a href="/api/login">Login with Spotify</a>
-        </div>
-      );
-    }
-
-    if (!profileRes.ok) {
-      const txt = await profileRes.text();
-      error = `Spotify API error: ${txt}`;
-    } else {
-      profile = await profileRes.json();
-    }
-  } catch (e) {
-    error = "Failed to fetch profile.";
+  const profile = await getProfile(accessToken);
+  if (!profile) {
+    return (
+      <main
+        style={{
+          padding: 32,
+          maxWidth: 400,
+          margin: "40px auto",
+          textAlign: "center",
+        }}
+      >
+        <h2>Session expired</h2>
+        <p>
+          <a
+            href="/api/refresh"
+            style={{
+              color: "#1DB954",
+              textDecoration: "none",
+              fontWeight: "bold",
+            }}
+          >
+            Refresh token
+          </a>{" "}
+          (click once, then reload)
+        </p>
+      </main>
+    );
   }
-
-  if (error) return <div>Error: {error}</div>;
-  if (!profile) return null;
 
   return (
     <div>
-      <h1>Welcome, {profile.display_name}</h1>
-      <p>Email: {profile.email}</p>
-      {profile.images?.[0]?.url && (
-        <img src={profile.images[0].url} alt="avatar" width={120} />
-      )}
+      <ProfileCard profile={profile} />
+      <SongSearch accessToken={accessToken} />
+      <div style={{ marginTop: 12, textAlign: "center" }}>
+        <a
+          href="/api/login"
+          style={{
+            color: "#1DB954",
+            textDecoration: "none",
+            fontWeight: "bold",
+          }}
+        >
+          Re-login
+        </a>
+        <span style={{ margin: "0 8px" }}>·</span>
+        <a
+          href="/api/refresh"
+          style={{
+            color: "#1DB954",
+            textDecoration: "none",
+            fontWeight: "bold",
+          }}
+        >
+          Refresh token
+        </a>
+      </div>
     </div>
   );
 }
