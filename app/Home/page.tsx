@@ -102,35 +102,6 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5">
-      {/* Header */}
-      <header className="border-b bg-background/80 backdrop-blur-lg sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-primary/10 p-2 rounded-lg">
-              <Music2 className="h-6 w-6 text-primary" />
-            </div>
-            <h1 className="text-2xl font-bold">
-              Music<span className="text-primary">Lab</span>
-            </h1>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" asChild>
-              <a href="/api/refresh">
-                <RotateCw className="h-4 w-4 mr-2" />
-                Refresh
-              </a>
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-              <a href="/api/login">
-                <LogOut className="h-4 w-4 mr-2" />
-                Re-login
-              </a>
-            </Button>
-          </div>
-        </div>
-      </header>
-
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 space-y-8">
         <ProfileCard profile={profile} />
