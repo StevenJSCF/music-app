@@ -1,7 +1,7 @@
 // pages/spotify.tsx
 
 import { cookies } from "next/headers";
-import { Music2, Sparkles, LogOut, RotateCw } from 'lucide-react';
+import { Music2, Sparkles, LogOut, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import ProfileCard from "../components/ProfileCard";
@@ -32,7 +32,6 @@ export default async function Home() {
               </div>
             </div>
           </div>
-          
           <div className="space-y-2">
             <h1 className="text-4xl font-bold tracking-tight text-balance">
               Welcome to <span className="text-primary">MusicLab</span>
@@ -41,20 +40,9 @@ export default async function Home() {
               Discover, explore, and connect with your music
             </p>
           </div>
-
           <div className="space-y-4 pt-4">
-            <Button 
-              asChild 
-              size="lg" 
-              className="w-full text-lg h-12 font-semibold"
-            >
-              <a href="/api/login">
-                <Sparkles className="mr-2 h-5 w-5" />
-                Connect with Spotify
-              </a>
-            </Button>
-            <p className="text-xs text-muted-foreground">
-              Sign in to unlock your personalized music experience
+            <p className="text-lg text-muted-foreground">
+              Spotify login is temporarily disabled.
             </p>
           </div>
         </Card>
@@ -72,7 +60,7 @@ export default async function Home() {
               <RotateCw className="h-16 w-16 text-destructive" />
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <h2 className="text-3xl font-bold">Session Expired</h2>
             <p className="text-muted-foreground">
@@ -80,9 +68,9 @@ export default async function Home() {
             </p>
           </div>
 
-          <Button 
-            asChild 
-            size="lg" 
+          <Button
+            asChild
+            size="lg"
             variant="default"
             className="w-full text-lg h-12"
           >
