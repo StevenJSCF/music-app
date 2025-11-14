@@ -1,13 +1,16 @@
 import { NextRequest } from "next/server";
-import { searchSpotifyTracks } from "@/app/lib/action/searchSpotify";
+import { getAudioFeatures } from "@/app/lib/action/getAudioFeatures";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const query = searchParams.get("q");
+  const id = searchParams.get("id");
   const accessToken = req.cookies.get("spotify_access_token")?.value;
 
+  console.log("Fetching audio features for track ID:", id);
+  console.log("Using access token:", accessToken ? "present" : "missing");
+
   try {
-    const data = await searchSpotifyTracks(query || "", accessToken || "");
+    const data = await getAudioFeatures(id || "", accessToken || "");
     return new Response(JSON.stringify(data), {
       status: 200,
       headers: { "Content-Type": "application/json" },
