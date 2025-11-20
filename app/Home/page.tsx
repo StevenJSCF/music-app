@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import ProfileCard from "../components/ProfileCard";
 import SongSearch from "../components/SongSearch";
+import ExternalSongSearch from "../components/ExternalSongSearch";
 
 async function getProfile(accessToken: string) {
   const profileRes = await fetch("https://api.spotify.com/v1/me", {
@@ -42,8 +43,10 @@ export default async function Home() {
           </div>
           <div className="space-y-4 pt-4">
             <p className="text-lg text-muted-foreground">
-              Spotify login is temporarily disabled.
+              Spotify login is temporarily disabled. You can still search for
+              songs below!
             </p>
+            <ExternalSongSearch />
           </div>
         </Card>
       </main>
