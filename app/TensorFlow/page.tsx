@@ -7,9 +7,36 @@ const CAMERA_SCRIPT =
 
 import { useEffect, useRef } from "react";
 
+/** 
+ * Normalize landmarks so ML training learns relative hand shape, 
+ * not position inside the frame.
+ */
+function normalizeLandmarks(landmarks: any[]) {
+  // Use the wrist point as the anchor (landmark index 0)
+  const baseX = landmarks[0].x;
+  const baseY = landmarks[0].y;
+  const baseZ = landmarks[0].z;
+
+  const normalized: number[] = [];
+
+  for (const p of landmarks) {
+    normalized.push(
+      p.x - baseX,
+      p.y - baseY,
+      p.z - baseZ
+    );
+  }
+
+  return normalized; // 63 numbers
+}
+
 export default function TensorFlow() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  // This will hold the latest feature vector (63 numbers)
+  const lastVectorRef = useRef<number[] | null>(null);
+
 
   useEffect(() => {
     // Load MediaPipe scripts dynamically
@@ -47,12 +74,19 @@ export default function TensorFlow() {
 
       hands.onResults((results: any) => {
         const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
+        const ctx = canvas?.getContext("2d");
+        if (!canvas || !ctx) return;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+
+        // If no hand detected this frame, skip
+        if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+          lastVectorRef.current = null; 
+          return;
+        }
+
+        const landmarks = results.multiHandLandmarks[0];
 
         if (results.multiHandLandmarks.length > 0) {
           const landmarks = results.multiHandLandmarks[0];
@@ -63,6 +97,10 @@ export default function TensorFlow() {
             ctx.fill();
           }
         }
+
+        // Extract normalized vector for ML
+        const vector = normalizeLandmarks(landmarks);
+        lastVectorRef.current = vector;
       });
 
       // Start camera
@@ -88,13 +126,13 @@ export default function TensorFlow() {
       camera.start();
     }
 
-    // 3️⃣ Everything runs here, IN ORDER
+    // Everything runs here, IN ORDER
     async function main() {
-      await loadScripts(); // ← load MediaPipe first
-      await enableCameraAndHands(); // ← then run tracking
+      await loadScripts(); //load MediaPipe first
+      await enableCameraAndHands(); //then run tracking
     }
 
-    main(); // ★ THIS IS WHAT YOU WERE MISSING ★
+    main(); 
   }, []);
 
   return (
