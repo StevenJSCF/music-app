@@ -1,4 +1,5 @@
 "use client";
+import * as tf from "@tensorflow/tfjs";
 
 // Load MediaPipe Hands from CDN
 const HANDS_SCRIPT = "https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js";
@@ -32,8 +33,8 @@ export default function TensorFlow() {
 
   // This will hold the latest feature vector (63 numbers)
   const lastVectorRef = useRef<number[] | null>(null);
-
   const samplesRef = useRef<{ label: string; landmarks: number[] }[]>([]);
+  const modelRef = useRef<tf.LayersModel | null>(null);
 
   const [label, setLabel] = useState("G");
 
@@ -137,6 +138,39 @@ export default function TensorFlow() {
         // Extract normalized vector for ML
         const vector = normalizeLandmarks(landmarks);
         lastVectorRef.current = vector;
+
+        // shape: [1, 63]
+        const input = tf.tensor2d([vector]);
+
+        // make sure the model is loaded
+        if (!modelRef.current) return;
+
+        // run prediction
+        const prediction = modelRef.current.predict(input) as
+          | tf.Tensor
+          | tf.Tensor[];
+
+        // normalize tensor output
+        const predictionTensor = Array.isArray(prediction)
+          ? prediction[0]
+          : prediction;
+
+        // highest probability index
+        const chordIndex = predictionTensor.argMax(-1).dataSync()[0];
+
+        // map index → chord
+        const chordMap = ["G", "C", "D", "Em"];
+        const predictedChord = chordMap[chordIndex];
+
+        console.log("Predicted chord:", predictedChord);
+
+        // dispose tensors
+        input.dispose();
+        if (Array.isArray(prediction)) {
+          prediction.forEach((t) => t.dispose());
+        } else {
+          prediction.dispose();
+        }
       });
 
       // Start camera
@@ -160,6 +194,9 @@ export default function TensorFlow() {
       });
 
       camera.start();
+
+      modelRef.current = await tf.loadLayersModel("/model/model.json");
+      console.log("Model loaded!");
     }
 
     // Everything runs here, IN ORDER

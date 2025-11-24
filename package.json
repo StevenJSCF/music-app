@@ -12,6 +12,7 @@
     "@mediapipe/drawing_utils": "^0.3.1675466124",
     "@mediapipe/hands": "^0.4.1675469240",
     "@radix-ui/react-slot": "^1.2.4",
+    "@tensorflow/tfjs": "^4.22.0",
     "@tensorflow/tfjs-node": "^4.22.0",
     "button": "^1.1.1",
     "card": "^2.5.4",
