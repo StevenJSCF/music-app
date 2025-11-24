@@ -5,10 +5,10 @@ const HANDS_SCRIPT = "https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js";
 const CAMERA_SCRIPT =
   "https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
-/** 
- * Normalize landmarks so ML training learns relative hand shape, 
+/**
+ * Normalize landmarks so ML training learns relative hand shape,
  * not position inside the frame.
  */
 function normalizeLandmarks(landmarks: any[]) {
@@ -20,11 +20,7 @@ function normalizeLandmarks(landmarks: any[]) {
   const normalized: number[] = [];
 
   for (const p of landmarks) {
-    normalized.push(
-      p.x - baseX,
-      p.y - baseY,
-      p.z - baseZ
-    );
+    normalized.push(p.x - baseX, p.y - baseY, p.z - baseZ);
   }
 
   return normalized; // 63 numbers
@@ -37,6 +33,43 @@ export default function TensorFlow() {
   // This will hold the latest feature vector (63 numbers)
   const lastVectorRef = useRef<number[] | null>(null);
 
+  const samplesRef = useRef<{ label: string; landmarks: number[] }[]>([]);
+
+  const [label, setLabel] = useState("G");
+
+  function captureSample() {
+    if (!lastVectorRef.current) {
+      console.warn("No landmarks available yet.");
+      return;
+    }
+
+    samplesRef.current.push({
+      label,
+      landmarks: lastVectorRef.current,
+    });
+
+    console.log(
+      `Saved sample #${samplesRef.current.length} for chord ${label}`
+    );
+  }
+
+  function downloadDataset() {
+    if (samplesRef.current.length === 0) {
+      alert("No samples collected yet!");
+      return;
+    }
+
+    const blob = new Blob([JSON.stringify(samplesRef.current, null, 2)], {
+      type: "application/json",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "chord-dataset.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   useEffect(() => {
     // Load MediaPipe scripts dynamically
@@ -81,8 +114,11 @@ export default function TensorFlow() {
         ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
         // If no hand detected this frame, skip
-        if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
-          lastVectorRef.current = null; 
+        if (
+          !results.multiHandLandmarks ||
+          results.multiHandLandmarks.length === 0
+        ) {
+          lastVectorRef.current = null;
           return;
         }
 
@@ -132,33 +168,74 @@ export default function TensorFlow() {
       await enableCameraAndHands(); //then run tracking
     }
 
-    main(); 
+    main();
   }, []);
 
   return (
-    <div style={{ position: "relative", width: 640, height: 480 }}>
-      <video
-        ref={videoRef}
-        style={{
-          width: 640,
-          height: 480,
-          position: "absolute",
-          top: 0,
-          left: 0,
-        }}
-      />
+    <div>
+      <div style={{ marginBottom: 12 }}>
+        <label style={{ color: "white", marginRight: 8 }}>Chord:</label>
+        <select
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          style={{ padding: 4 }}
+        >
+          <option value="G">G</option>
+          <option value="C">C</option>
+          <option value="D">D</option>
+          <option value="Em">Em</option>
+        </select>
+      </div>
 
-      <canvas
-        ref={canvasRef}
-        width={640}
-        height={480}
+      <div style={{ marginBottom: 12 }}>
+        <button
+          onClick={captureSample}
+          style={{ padding: "6px 12px", cursor: "pointer" }}
+        >
+          Capture Sample
+        </button>
+      </div>
+
+      <div style={{ marginBottom: 12, marginLeft: 12 }}>
+        Samples: {samplesRef.current.length}
+      </div>
+
+      <button
+        onClick={downloadDataset}
         style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          pointerEvents: "none",
+          padding: "6px 12px",
+          marginBottom: 12,
+          cursor: "pointer",
+          marginLeft: 8,
         }}
-      />
+      >
+        Download Dataset
+      </button>
+
+      <div style={{ position: "relative", width: 640, height: 480 }}>
+        <video
+          ref={videoRef}
+          style={{
+            width: 640,
+            height: 480,
+            position: "absolute",
+            top: 0,
+            left: 0,
+          }}
+        />
+
+        <canvas
+          ref={canvasRef}
+          width={640}
+          height={480}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            pointerEvents: "none",
+          }}
+        />
+      </div>
     </div>
   );
 }
