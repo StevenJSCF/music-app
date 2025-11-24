@@ -2,7 +2,7 @@ const tf = require("@tensorflow/tfjs-node");
 const fs = require("fs");
 
 // Load dataset from JSON file
-const raw = fs.readFileSync("chord-dataset.json");
+const raw = fs.readFileSync("current-chord-dataset.json");
 const dataset = JSON.parse(raw);
 
 // Map chord labels → numbers
