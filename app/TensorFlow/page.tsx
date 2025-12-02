@@ -32,7 +32,7 @@ export default function TensorFlow() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // chord prediction (live inference)
-  const chordMap = ["G", "C", "D"]; // no Em for now
+  const chordMap = ["G", "C", "D", "Em"];
   const lastPredictionsRef = useRef<number[]>([]);
   const SMOOTHING = 10; // how many frames to average
   const THRESHOLD = 0.75; // confidence threshold
@@ -64,6 +64,7 @@ export default function TensorFlow() {
   const modelRef = useRef<tf.LayersModel | null>(null);
 
   const [label, setLabel] = useState("G");
+  const [currentChord, setCurrentChord] = useState<string | null>(null);
 
   function captureSample() {
     if (!lastVectorRef.current) {
@@ -147,6 +148,7 @@ export default function TensorFlow() {
           results.multiHandLandmarks.length === 0
         ) {
           lastVectorRef.current = null;
+          setCurrentChord(null);
           return;
         }
 
@@ -197,7 +199,7 @@ export default function TensorFlow() {
         const stable = stablePrediction(maxIdx, maxConf);
         if (stable) {
           console.log("Stable chord:", stable);
-          // TODO: update UI or play sound here (useState / callbacks)
+          setCurrentChord(stable);
         } else {
           console.log("Unstable prediction:", maxIdx, maxConf.toFixed(3));
         }
@@ -298,7 +300,6 @@ export default function TensorFlow() {
             left: 0,
           }}
         />
-
         <canvas
           ref={canvasRef}
           width={640}
@@ -310,6 +311,25 @@ export default function TensorFlow() {
             pointerEvents: "none",
           }}
         />
+      </div>
+
+      <div
+        style={{
+          marginTop: 20,
+          fontSize: 36,
+          fontWeight: "bold",
+          color: "white",
+          textAlign: "center",
+          background: "rgba(0,0,0,0.7)",
+          padding: "8px 16px",
+          borderRadius: 8,
+          display: "inline-block",
+          margin: "20px auto 0",
+        }}
+      >
+        {currentChord
+          ? `Current Chord: ${currentChord}`
+          : "No chord detected..."}
       </div>
     </div>
   );
