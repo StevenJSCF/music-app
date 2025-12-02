@@ -31,6 +31,33 @@ export default function TensorFlow() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  // chord prediction (live inference)
+  const chordMap = ["G", "C", "D"]; // no Em for now
+  const lastPredictionsRef = useRef<number[]>([]);
+  const SMOOTHING = 10; // how many frames to average
+  const THRESHOLD = 0.75; // confidence threshold
+
+  function stablePrediction(
+    predIndex: number,
+    confidence: number
+  ): string | null {
+    if (confidence < THRESHOLD) return null;
+
+    const buf = lastPredictionsRef.current;
+    buf.push(predIndex);
+    if (buf.length > SMOOTHING) buf.shift();
+
+    const counts: Record<number, number> = {};
+    for (const p of buf) counts[p] = (counts[p] || 0) + 1;
+
+    const best = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+    if (best && Number(best[1]) > SMOOTHING * 0.6) {
+      return chordMap[Number(best[0])];
+    }
+
+    return null;
+  }
+
   // This will hold the latest feature vector (63 numbers)
   const lastVectorRef = useRef<number[] | null>(null);
   const samplesRef = useRef<{ label: string; landmarks: number[] }[]>([]);
@@ -155,14 +182,25 @@ export default function TensorFlow() {
           ? prediction[0]
           : prediction;
 
-        // highest probability index
-        const chordIndex = predictionTensor.argMax(-1).dataSync()[0];
+        // highest probability index + confidence
+        const probs = predictionTensor.dataSync();
+        let maxConf = 0;
+        let maxIdx = 0;
+        for (let i = 0; i < probs.length; i++) {
+          if (probs[i] > maxConf) {
+            maxConf = probs[i];
+            maxIdx = i;
+          }
+        }
 
-        // map index → chord
-        const chordMap = ["G", "C", "D", "Em"];
-        const predictedChord = chordMap[chordIndex];
-
-        console.log("Predicted chord:", predictedChord);
+        // run smoothing / stability filter
+        const stable = stablePrediction(maxIdx, maxConf);
+        if (stable) {
+          console.log("Stable chord:", stable);
+          // TODO: update UI or play sound here (useState / callbacks)
+        } else {
+          console.log("Unstable prediction:", maxIdx, maxConf.toFixed(3));
+        }
 
         // dispose tensors
         input.dispose();
