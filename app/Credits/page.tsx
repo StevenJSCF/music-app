@@ -1,14 +1,12 @@
-import { ExternalLink, Music2, Heart } from 'lucide-react';
-import Link from 'next/link';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import Navbar from '../components/NavBar';
+import { ExternalLink, Music2, Heart } from "lucide-react";
+import Link from "next/link";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Navbar from "../../components/NavBar";
 
 export default function Credits() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5">
-      <Navbar />
-      
       <main className="container mx-auto px-4 py-16 max-w-3xl">
         <div className="space-y-8">
           {/* Header Section */}
@@ -40,11 +38,16 @@ export default function Credits() {
                     <h2 className="text-xl font-semibold">Spotify</h2>
                   </div>
                   <p className="text-muted-foreground leading-relaxed">
-                    Music streaming and profile data powered by the Spotify Web API
+                    Music streaming and profile data powered by the Spotify Web
+                    API
                   </p>
                 </div>
                 <Button variant="ghost" size="sm" asChild>
-                  <a href="https://spotify.com" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href="https://spotify.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <ExternalLink className="h-4 w-4" />
                   </a>
                 </Button>
@@ -57,11 +60,16 @@ export default function Credits() {
                 <div className="space-y-2 flex-1">
                   <h2 className="text-xl font-semibold">GetSongBPM</h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    BPM (beats per minute) data and music analysis provided by GetSongBPM
+                    BPM (beats per minute) data and music analysis provided by
+                    GetSongBPM
                   </p>
                 </div>
                 <Button variant="ghost" size="sm" asChild>
-                  <a href="https://getsongbpm.com" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href="https://getsongbpm.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <ExternalLink className="h-4 w-4" />
                   </a>
                 </Button>

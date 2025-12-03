@@ -1,4 +1,4 @@
-import { Music2, Info } from 'lucide-react';
+import { Music2, Info, Music3, Disc3 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
@@ -17,8 +17,20 @@ export default function Navbar() {
         
         <nav className="flex items-center gap-2">
           <Button variant="ghost" size="sm" asChild>
+            <Link href="/Bpm">
+              <Disc3 className="h-4 w-4" />
+              Bpm
+            </Link>
+          </Button>   
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/TensorFlow">
+              <Music3 className="h-4 w-4" />
+              Chords Recognition
+            </Link>
+          </Button>
+          <Button variant="ghost" size="sm" asChild>
             <Link href="/Credits">
-              <Info className="h-4 w-4 mr-2" />
+              <Info className="h-4 w-4" />
               Credits
             </Link>
           </Button>

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSongData } from "@/app/lib/action/searchSong";
+import { getSongData } from "@/lib/action/searchSong";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);

@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { searchSpotifyTracks } from "@/app/lib/action/searchSpotify";
+import { searchSpotifyTracks } from "@/lib/action/searchSpotify";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);

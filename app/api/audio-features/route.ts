@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getAudioFeatures } from "@/app/lib/action/getAudioFeatures";
+import { getAudioFeatures } from "@/lib/action/getAudioFeatures";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
